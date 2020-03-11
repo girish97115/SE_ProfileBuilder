@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+<link href=”{{ STATIC_URL }}jquery-autosuggest/css/autoSuggest-upshot.css”
+      type=”text/css” media=”all” rel=”stylesheet”/>
+<script type=”text/javascript”
+        src=”{{ STATIC_URL }}jquery-autosuggest/js/jquery.autoSuggest.minified.js”></script>
+
+
+{% load crispy_forms_tags %}
+{% block content %}
+    <div class="content-section">
+        <div class="media">
+            {% if user.is_teacher %}
+                <img class="rounded-circle account-img" src="{{ user.facultyprofile.image.url }}">
+            {% else %}
+                <img class="rounded-circle account-img" src="{{ user.studentprofile.image.url }}">
+            {% endif %}
+            <div class="media-body">
+                <h2 class="account-heading">{{ user.username }}</h2>
+                <p class="text-secondary">{{ user.email }}</p>
+            </div>
+        </div>
+        <form method="POST" enctype="multipart/form-data">
+
+            {% csrf_token %}
+            <fieldset class="form-group">
+                <legend class="border-bottom mb-4">Profile Info
+                </legend>
+                {{ U_form.media }}
+                {{ u_form|crispy }}
+                {{ p_form.media }}
+                {{ p_form|crispy }}
+            </fieldset>
+            <div class="form-group">
+                <button class="btn btn-outline-info" type="submit">Update</button>
+            </div>
+        </form>
+    </div>
+{% endblock content %}
