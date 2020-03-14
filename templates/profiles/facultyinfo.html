@@ -29,7 +29,10 @@
         </div>
     </div>
     <div>
-        <a class="btn btn-outline-info mb-4" href="{% url 'appointment' profile.id %} ">Book an Apppointment</a>
+        {% if not user.is_anonymous %}
+            <a class="btn btn-outline-info mb-4" href="{% url 'appointment' profile.id %} ">Book an Apppointment</a>
+        {% else %}
+        {% endif %}
     </div>
 
     <p> Suggested Staff </p>
