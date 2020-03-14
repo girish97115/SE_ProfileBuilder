@@ -33,8 +33,8 @@ class StudentProfile(models.Model):
 
 
 class Appointment(models.Model):
-    faculty = models.OneToOneField(FacultyProfile, on_delete=models.CASCADE)
-    student = models.OneToOneField(StudentProfile, on_delete=models.CASCADE)
+    faculty = models.ForeignKey(FacultyProfile, on_delete=models.CASCADE)
+    student = models.ForeignKey(StudentProfile, on_delete=models.CASCADE)
     date = models.DateField()
     reason_reject = models.CharField(max_length=1024, null=True)
-    accepted = models.BooleanField(default=False)
+    accepted = models.IntegerField(default=-1)

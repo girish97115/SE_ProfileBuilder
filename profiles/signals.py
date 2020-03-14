@@ -9,10 +9,17 @@ User = get_user_model()
 
 @receiver(post_save, sender=User)
 def create_profile(sender, instance, created, **kwargs):
-    if created:  # used to perform action only at creation time (avoid the code to execute during any update)
-        if instance.is_teacher:  # access the field of instance
-            profile = FacultyProfile.objects.create(
-                user=instance)  # you have correctly passed instance to foreign key and you just need to check condition for the same
-
+    if created:
+        if instance.is_teacher:
+            profile = FacultyProfile.objects.create(user=instance)
         else:
             profile = StudentProfile.objects.create(user=instance)
+
+#
+# @receiver(post_save, sender=User)
+# def save_profile(sender, instance, **kwargs):
+#     if instance.is_teacher:  # access the field of instance
+#         profile = instance.FacultyProfile.save()
+#
+#     else:
+#         profile = instance.StudentProfile.save()

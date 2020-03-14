@@ -31,4 +31,32 @@
     <div>
         <a class="btn btn-outline-info mb-4" href="{% url 'appointment' profile.id %} ">Book an Apppointment</a>
     </div>
+
+    <p> Suggested Staff </p>
+    {% for pro in profilesrelated %}
+        <article class="media content-section">
+            <img class="rounded-circle article-img" src="{{ pro.image.url }}">
+            <div class="media-body">
+                <div class="article-metadata">
+                    <a class="mr-2" href="{% url 'faculty-info' pro.id %}">{{ pro.user.username }}</a>
+
+                    {% if not user.is_anonymous %}
+                        <div id="favourite-section" style="display: flex ;justify-content: flex-end">
+                            <a href="{% url 'post-favourite' pro.id %}">
+                                {% if pro.is_favourite %}
+                                    <i class="fas fa-bookmark fa-lg"></i>
+                                {% else %}
+                                    <i class="far fa-bookmark fa-lg"></i>
+                                {% endif %}
+                            </a>
+                        </div>
+                    {% else %}
+
+                    {% endif %}
+
+                    <small class="text-muted">{{ pro.about| safe }}</small>
+                </div>
+            </div>
+        </article>
+    {% endfor %}
 {% endblock content %}

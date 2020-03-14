@@ -6,9 +6,9 @@ from django.views.generic import (
     ListView
 )
 
-from users.forms import AppointmentCreationForm
+from users.forms import AppointmentCreationForm, AppointmentRejectionForm
 from users.models import User
-from .models import FacultyProfile
+from .models import FacultyProfile, Appointment, StudentProfile
 
 
 class FacultyProfileListView(ListView):
@@ -16,6 +16,22 @@ class FacultyProfileListView(ListView):
     template_name = 'profiles/home.html'
     context_object_name = 'profiles'
     paginate_by = 4
+
+
+class AppointmentListView(ListView):
+    model = Appointment
+    template_name = 'profiles/appointmentlistview.html'
+    context_object_name = 'appointments'
+    paginate_by = 4
+
+    def get_queryset(self):
+        student_profile = StudentProfile.objects.filter(user=self.request.user.id).first()
+        appointments = Appointment.objects.filter(student=student_profile.id).all()
+        object_list = []
+        for appointment in appointments:
+            object_list.append(appointment)
+
+        return object_list
 
 
 class FacultySearchList(ListView):
@@ -62,7 +78,7 @@ def make_appointment(request, pk):
             appointment.faculty = faculty
             appointment.student = student
             appointment.save()
-            messages.success(request, f'Your Account has been updated!')
+            messages.success(request, f'Appointment request Sent')
             return HttpResponseRedirect(reverse('home'))
 
     else:
@@ -73,7 +89,70 @@ def make_appointment(request, pk):
 
 def faculty_info(request, pk):
     profile = get_object_or_404(FacultyProfile, id=pk)
-    return render(request, 'profiles/facultyinfo.html', {'profile': profile})
+    profiles = FacultyProfile.objects.all()
+    object_list = []
+    for pro in profiles:
+        object_list.append(pro)
+    return render(request, 'profiles/facultyinfo.html', {'profile': profile, 'profilesrelated': object_list[1:4]})
+
+
+class RequestsListView(ListView, LoginRequiredMixin):
+    model = Appointment
+    template_name = 'users/requests.html'
+    context_object_name = 'requests'
+    paginate_by = 3
+
+    def get_queryset(self):
+        faculty_profile = FacultyProfile.objects.filter(user=self.request.user.id).first()
+        appointments = Appointment.objects.filter(faculty=faculty_profile.id).all()
+        object_list = []
+        for appointment in appointments:
+            object_list.append(appointment)
+
+        return object_list
+
+
+class StatusRequestsListView(ListView):
+    model = Appointment
+    template_name = 'profiles/appointment_status.html'
+    context_object_name = 'appointments'
+    paginate_by = 3
+
+    # def get_queryset(self):
+    #     student_profile = StudentProfile.objects.filter(user=self.request.user.id).first()
+    #     appointments = Appointment.objects.filter(student=student_profile.id).all()
+    #     object_list = []
+    #     for appointment in appointments:
+    #         object_list.append(appointment)
+    #
+    #     return object_list
+
+
+def accept_appointment(request, pk):
+    appointment = get_object_or_404(Appointment, id=pk)
+    appointment.accepted = 1
+    appointment.save()
+    messages.success(request, f'Appointment Accepted')
+    return HttpResponseRedirect(reverse('home'))
+
+
+def reject_appointment(request, pk):
+    appointment = get_object_or_404(Appointment, id=pk)
+
+    if request.method == "POST":
+        form = AppointmentRejectionForm(request.POST)
+        if form.is_valid():
+            reason = form.cleaned_data['Reason']
+            appointment.accepted = 0
+            appointment.reason_reject = reason
+            appointment.save()
+            messages.success(request, f'Appointment Rejected')
+            return HttpResponseRedirect(reverse('home'))
+
+    else:
+        form = AppointmentRejectionForm()
+
+    return render(request, 'users/reject_appointment.html', {'form': form})
 
 
 class BookmarksListView(ListView, LoginRequiredMixin):

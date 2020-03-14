@@ -8,8 +8,12 @@ from profiles.models import StudentProfile, FacultyProfile, Appointment
 User = get_user_model()
 
 
-class DatePickerCustom(forms.DateInput):
-    input_type = 'date'
+class DateTimeInput(forms.DateTimeInput):
+    input_type = "date"
+
+    def __init__(self, **kwargs):
+        kwargs["format"] = ['%Y-%m-%d']
+        super().__init__(**kwargs)
 
 
 class CustomUserCreationForm(UserCreationForm):
@@ -21,9 +25,15 @@ class CustomUserCreationForm(UserCreationForm):
 class AppointmentCreationForm(forms.ModelForm):
     class Meta:
         model = Appointment
-        widgets = {'my_date_field': DatePickerCustom()}
-        date = forms.DateField()
         fields = ['date']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["date"].widget = DateTimeInput()
+
+
+class AppointmentRejectionForm(forms.Form):
+    Reason = forms.CharField(label='Mention Reason', max_length=100)
 
 
 class UserUpdateForm(forms.ModelForm):
